@@ -2,5 +2,5 @@
 # Brain Tumor Classification
 -------------
 ### 해당 모델을 고른 이유
-> 랜덤 포레스트 모델의 경우 결정 트리 알고리즘을 기반으로 합니다. 이로 인해서 로지스틱 회귀와 같이 각 예측변수의 효과를 파악하기 어렵다는 단점과 새로운 자료에 대한 예측이 
-> 불안정할 수 있다는 단점이 생깁니다. 반대로 로지스틱 회귀의 경우 제한적인 표현력과 성능의 문제가 있습니다. 
+> For random forest models, it is based on the decision tree algorithm. As a result, it is difficult to grasp the effect of each predictor, such as logistic regression, and it may lead to unstable predictions for new data. Conversely, logistic regression has limited expressiveness and performance problems. As such, there are pros and cons for each model.
+> 
