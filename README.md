@@ -3,12 +3,8 @@
 -------------
 ### The reason I chose this model
 ##### [VotingClassifier]
-> For random forest models, it is based on the decision tree algorithm. As a result, it is difficult to grasp the effect of each predictor, such as logistic regression, and it may lead to unstable predictions for new data. Conversely, logistic regression has limited expressiveness and performance problems. As such, there are pros and cons for each model.
+> Knn uses a lot of memory and takes a long time, unlike logistic regression because it compares all the existing data. Conversely, logistic regression has limited expressiveness and performance problems. As such, there are pros and cons for each model.
 > That is why I used ensemble learning to complement the shortcomings of single models by combining multiple models. Among them, I used a voting classifier in which classifiers with different algorithms are learned and combined based on the same dataset.
-### Preprocessing used
----------------
-##### [RobustScaler]
-> I found that the model's performance was rather poor when I used minmax scaling and standard scaling. I analyzed that the cause of this is an outlier. So to solve this problem, I used robust scaling with median and IQR, and I was able to improve the performance of the model.
 ### Hyperparameter optimization
 ------------
 > At this time, the hyperparameters were selected mainly to help improve model performance. In addition, for the n_jobs parameter,  fixed it to -1 to use the maximum number of CPU cores.
@@ -36,31 +32,30 @@ model = GridSearchCV(logModel,param_grid=param_grid,n_jobs=-1)
 best_model = model.fit(X,y)
 best_model.best_estimator_
 ```
-2. RandomForestClassifier
-    - n_estimators
-      - Since this is a hyperparameter related to the number of trees to be generated, it is not good to be too large, so I applied it to the model up to 200.
-    - random_state
-      - The hyperparameters determining the random number were fixed at 100.
-- using code
-```python
-n_estimators = [50,100,150,200]
-for n in n_estimators:
-  rfc = sklearn.ensemble.RandomForestClassifier(n_estimators=n, random_state=100,n_jobs = -1)
-  rfc = rfc.fit(X_train_scaled, y_train)
-  y_pred = rfc.predict(X_test_scaled)
-  print('Accuracy: %.2f' % sklearn.metrics.accuracy_score(y_test, y_pred))
-```
-3. KNeighborsClassifier
+2. KNeighborsClassifier
     - n_neighbors
-      - The number of neighbors used to spin the model was determined from 1 to 10.
+      - The number of neighbors used to spin the model was determined from 1 to 20.
+    - metric
+      - Since it is a measure of distance calculation, all cases were compared.
+    - weights
+      - Since it is a parameter that gives different weights depending on the distance of adjacent samples, it is thought to play an important role in performance, so it was included in the comparison.
+    - leaf_size
+      - If it is too small, the performance decreases, and if it is too large, the performance decreases again due to noise, so I put a certain range value.
+    - p
+      - Since it is a parameter, I put 1 and 2.
 - using code
 ```python
-n_neighbors = [1,2,3,4,5,6,7,8,9,10]
-for n in n_neighbors:
-  knn = sklearn.neighbors.KNeighborsClassifier(n_neighbors=n,n_jobs=-1)
-  knn = knn.fit(X_train_scaled, y_train)
-  y_pred = knn.predict(X_test_scaled)
-  print('Accuracy: %.2f' % sklearn.metrics.accuracy_score(y_test, y_pred))
+from sklearn.model_selection import GridSearchCV
+grid_params = {
+    'n_neighbors' : list(range(1,20)),
+    'weights' : ["uniform", "distance"],
+    'metric' : ['euclidean', 'manhattan', 'minkowski'],
+    'leaf_size' : list(range(1,20)),
+    'p' : [1, 2]
+}
+gs = GridSearchCV(knn, grid_params, cv=10)
+gs.fit(X_train, y_train)
+print("Best Parameters : ", gs.best_params_)
 ```
 ### Check model performance
 ---------------
@@ -68,5 +63,5 @@ for n in n_neighbors:
 ```python
 print(sklearn.metrics.classification_report(y_test,y_pred))
 ```
-![image](https://user-images.githubusercontent.com/115198568/207351995-9d64f30a-1b7c-41de-a25f-62b70a00cd49.png)
+![image](https://user-images.githubusercontent.com/115198568/208087936-40a888ed-27b5-4258-b78a-6854d1f066f3.png)
 > By comparing the precision and recall rate, it was possible to check whether there was a large difference between the actual value and the predicted value. In addition, the weighted harmonized average of precision and recall could be seen through f1-score. Through this, it was found that this model works to produce good performance.
